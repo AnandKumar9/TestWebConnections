@@ -8,12 +8,65 @@
 import UIKit
 
 class ViewController: UIViewController {
+    
+    @IBOutlet weak var testButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
     }
-
-
+    
+    @IBAction func testButtonTapped(_ sender: UIButton) {
+        print("Test button was tapped!")
+        
+        // Make API call to localhost
+        makeAPICall()
+    }
+    
+    private func makeAPICall() {
+        guard let url = URL(string: "http://localhost:8080/hello/vapor") else {
+            showAlert(title: "Error", message: "Invalid URL")
+            return
+        }
+        
+        // Show loading state
+        testButton.isEnabled = false
+        testButton.setTitle("Loading...", for: .disabled)
+        
+        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                
+                self?.testButton.isEnabled = true
+                self?.testButton.setTitle("Test Button", for: .normal)
+                
+                if let error = error {
+                    print("Network error: \(error.localizedDescription)")
+                    print("Network Error \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("Error - Invalid response")
+                    return
+                }
+                
+                print("Response status code: \(httpResponse.statusCode)")
+                
+                if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                    print("Response payload: \(responseString)")
+                } else {
+                    print("No response payload")
+                }
+            }
+        }
+        
+        task.resume()
+    }
+    
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 

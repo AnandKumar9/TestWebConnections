@@ -19,11 +19,13 @@ class ViewController: UIViewController {
     @IBAction func testButtonTapped(_ sender: UIButton) {
         print("Test button was tapped!")
         
-        // Make API call to localhost
-        makeAPICall()
+//        makeRegularAPICall()
+        makeSSEAPICall()
+        
+        
     }
     
-    private func makeAPICall() {
+    private func makeRegularAPICall() {
         guard let url = URL(string: "http://localhost:8080/hello/vapor") else {
             showAlert(title: "Error", message: "Invalid URL")
             return
@@ -61,6 +63,12 @@ class ViewController: UIViewController {
         }
         
         task.resume()
+    }
+    
+    private func makeSSEAPICall() {
+        let url = URL(string: "http://localhost:8080/events")!
+        let sseClient = SSEClient(url: url)
+        sseClient.start()
     }
     
     private func showAlert(title: String, message: String) {

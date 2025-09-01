@@ -12,23 +12,58 @@ class SSEClient: NSObject, URLSessionDataDelegate {
     private let printVerboseLogs = false
     private let stopAfterOneEvent = false
     
+    private var url: URL
     private var urlSession: URLSession!
     private var task: URLSessionDataTask?
+    
     private var responsePayloadBuffer = ""
+    
+    private var lastEventId: String?
+    private var retryFrequency: TimeInterval = 3.0
 
-    init(url: URL) {
+    private var isSupposedToHaveActiveConnection: Bool = false {
+        didSet {
+            connectionStatusHandler?(isSupposedToHaveActiveConnection)
+        }
+    }
+    private var connectionStatusHandler: ((Bool) -> Void)?
+    
+    init(url: URL, connectionStatusHandler: ((Bool) -> Void)?) {
+        self.url = url
+        self.connectionStatusHandler = connectionStatusHandler
+        
         super.init()
+        
         let configuration = URLSessionConfiguration.default
         urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
-        task = urlSession.dataTask(with: url)
     }
 
     func start() {
+        var request = URLRequest(url: url)
+        
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+        if let lastId = lastEventId {
+            request.setValue(lastId, forHTTPHeaderField: "Last-Event-ID")
+        }
+
+        task = urlSession.dataTask(with: request)
         task?.resume()
+        isSupposedToHaveActiveConnection = true
     }
 
     func stop() {
         task?.cancel()
+        isSupposedToHaveActiveConnection = false
+        lastEventId = nil
+    }
+    
+    private func reconnect(after delay: TimeInterval) {
+        guard isSupposedToHaveActiveConnection else { return }
+        
+        print("Reconnecting in \(delay) seconds...")
+        DispatchQueue.global().asyncAfter(deadline: .now() + delay) { [weak self] in
+            self?.start()
+        }
     }
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
@@ -54,6 +89,11 @@ class SSEClient: NSObject, URLSessionDataDelegate {
         
         responsePayloadBuffer += delegateChunk
         processResponsePayloadBuffer()
+    }
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        print("Connection error: \(error?.localizedDescription ?? "unknown")")
+        reconnect(after: retryFrequency)
     }
 
     private func processResponsePayloadBuffer() {
@@ -113,10 +153,14 @@ class SSEClient: NSObject, URLSessionDataDelegate {
             else if line.starts(with: idKey) {
                 let idKey = line.dropFirst(idKey.count).trimmingCharacters(in: .whitespaces)
                 print("id: \(idKey)")
+                lastEventId = idKey
             }
             else if line.starts(with: retryKey) {
                 let retryKey = line.dropFirst(retryKey.count).trimmingCharacters(in: .whitespaces)
                 print("Retry: \(retryKey)")
+                if let retryValue = Double(retryKey) {
+                    retryFrequency = retryValue / 1000.0
+                }
             }
         }
         

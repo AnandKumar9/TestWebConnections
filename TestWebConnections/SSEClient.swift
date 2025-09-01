@@ -30,6 +30,19 @@ class SSEClient: NSObject, URLSessionDataDelegate {
     func stop() {
         task?.cancel()
     }
+    
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+
+        if let httpResponse = response as? HTTPURLResponse,
+           let contentType = httpResponse.allHeaderFields["Content-Type"] as? String {
+            if contentType != "text/event-stream; charset=utf-8" {
+                stop()
+            }
+        }
+
+        completionHandler(.allow)
+    }
+
 
     // Called as new data arrives, note that a single piece of data received on device may still mean multiple callbacks for this delegate
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {

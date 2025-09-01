@@ -10,6 +10,7 @@ import Foundation
 class SSEClient: NSObject, URLSessionDataDelegate {
     
     private let printVerboseLogs = false
+    private let stopAfterOneEvent = false
     
     private var urlSession: URLSession!
     private var task: URLSessionDataTask?
@@ -91,6 +92,10 @@ class SSEClient: NSObject, URLSessionDataDelegate {
             else if line.starts(with: dataKey) {
                 let data = line.dropFirst(dataKey.count).trimmingCharacters(in: .whitespaces)
                 print("Data: \(data)")
+                
+                if stopAfterOneEvent {
+                    stop()
+                }
             }
             else if line.starts(with: idKey) {
                 let idKey = line.dropFirst(idKey.count).trimmingCharacters(in: .whitespaces)
@@ -102,8 +107,6 @@ class SSEClient: NSObject, URLSessionDataDelegate {
             }
         }
         
-        if printVerboseLogs {
-            print("*****************")
-        }
+        print("*****************")
     }
 }

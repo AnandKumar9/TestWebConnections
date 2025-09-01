@@ -10,10 +10,19 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet weak var testButton: UIButton!
-
+    @IBOutlet weak var stopButton: UIButton!
+    
+    var sseClient: SSEClient?
+    private var hasAnActiveConnection: Bool = false {
+        didSet {
+            testButton.isEnabled = !hasAnActiveConnection
+            stopButton.isEnabled = hasAnActiveConnection
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        hasAnActiveConnection = false
     }
     
     @IBAction func testButtonTapped(_ sender: UIButton) {
@@ -21,8 +30,12 @@ class ViewController: UIViewController {
         
 //        makeRegularAPICall()
         makeSSEAPICall()
-        
-        
+        hasAnActiveConnection = true
+    }
+    
+    @IBAction func stopButtonTapped(_ sender: Any) {
+        sseClient?.stop()
+        hasAnActiveConnection = false
     }
     
     private func makeRegularAPICall() {
@@ -67,8 +80,9 @@ class ViewController: UIViewController {
     
     private func makeSSEAPICall() {
         let url = URL(string: "http://localhost:8080/events")!
-        let sseClient = SSEClient(url: url)
-        sseClient.start()
+        sseClient = SSEClient(url: url)
+        sseClient?.start()
+        hasAnActiveConnection = true
     }
     
     private func showAlert(title: String, message: String) {

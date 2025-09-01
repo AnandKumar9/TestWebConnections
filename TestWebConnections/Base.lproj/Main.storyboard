@@ -24,20 +24,36 @@
                                     <constraint firstAttribute="width" constant="100" id="btn-width"/>
                                 </constraints>
                                 <state key="normal" title="Test Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Button A"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Test"/>
                                 <connections>
                                     <action selector="testButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="btn-action"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vqm-Oz-WMd">
+                                <rect key="frame" x="146.66666666666666" y="302" width="100" height="40"/>
+                                <color key="backgroundColor" systemColor="systemBlueColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="40" id="cFa-wp-x1z"/>
+                                    <constraint firstAttribute="width" constant="100" id="pwp-Xj-1X0"/>
+                                </constraints>
+                                <state key="normal" title="Test Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Stop"/>
+                                <connections>
+                                    <action selector="stopButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="8sf-rZ-fxV"/>
                                 </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="vqm-Oz-WMd" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="3nW-nG-8QE"/>
+                            <constraint firstItem="vqm-Oz-WMd" firstAttribute="top" secondItem="abc-12-def" secondAttribute="bottom" constant="44" id="YPc-ct-gx9"/>
                             <constraint firstItem="abc-12-def" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="btn-centerX"/>
                             <constraint firstItem="abc-12-def" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="100" id="btn-top"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="stopButton" destination="vqm-Oz-WMd" id="pXw-qf-AQS"/>
                         <outlet property="testButton" destination="abc-12-def" id="btn-outlet"/>
                     </connections>
                 </viewController>
@@ -51,7 +67,7 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemBlueColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
